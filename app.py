@@ -1,43 +1,87 @@
-from flask import Flask
-from flask_spyne import Spyne
+from spyne import Application, rpc, ServiceBase, Iterable, Integer, Unicode
+
 from spyne.protocol.soap import Soap11
-from spyne.model.primitive import Unicode, Integer
-from spyne.model.complex import Iterable
+from spyne.server.wsgi import WsgiApplication
+
 import sqlite3
 import collections
 
-app = Flask(__name__)
-spyne = Spyne(app)
 
-class SomeSoapService(spyne.Service):
-	__service_url_path__ = '/soap/someservice'
-	__in_protocol__ = Soap11(validator='lxml')
-	__out_protocol__ = Soap11()
+class HelloWorldService(ServiceBase):
+    @rpc(Unicode, Integer, _returns=Iterable(Unicode))
+    def say_hello(ctx, name, times):
+        for i in range(times):
+            yield u'Hello, %s' % name
 
-	@spyne.srpc(Unicode, Integer, _returns=Iterable(Unicode))
-	def echo(str, cnt):
-		for i in range(cnt):
-			yield str
-
-	@spyne.srpc(_returns=Iterable(Unicode)) #decorator
-	def consulta_db():
+class Consulta_DB(ServiceBase):
+	@rpc(_returns=Iterable(Unicode)) #decorator
+	def consulta_db(ctx):
 		conn = sqlite3.connect('meteofib.db')
 		print "Opened database successfully";
 		cursor = conn.cursor()
 		cursor.execute("SELECT * FROM meteofib_table")
 		rv = cursor.fetchall()
-		cursor.close()
+		conn.close()
 		row_list = []
+		result = ""
 		for row in rv:
-			d = collections.OrderedDict()
-			d['Fecha'] = row[0]
-			d['Hora'] = row[1]
-			d['Ciudad'] = row[2]
-			d['Temperatura'] = row[3]
-			d['Humedad'] = row[4]
-			d['P_atmos'] = row[5]
-			row_list.append(d)
-		yield(str(rv))
+			result = "Fecha: "
+			result += row[0]
+			result += " Hora: "
+			result += row[1]
+			result += " Ciudad: "
+			result += row[2]
+			result += " Temperatura: "
+			result += row[3]
+			result += " Humedad: "
+			result += row[4]
+			result += " P_atmos: "
+			result += row[5]
+			yield(result)
+
+class Insert_DB(ServiceBase):
+	@rpc(Unicode, Unicode, Unicode, Unicode, Unicode, Unicode) #decorator
+	def insert_db(ctx, fecha, hora, ciudad, temperatura, humedad, p_atmos):
+
+		query = "INSERT INTO meteofib_table (fecha, hora, ciudad, temperatura, humedad, p_atmos) VALUES ('"
+		query += fecha
+		query += "', '"
+		query += hora
+		query += "', '"
+		query += ciudad
+		query += "', '"
+		query += temperatura
+		query += "', '"
+		query += humedad
+		query += "', '"		
+		query += p_atmos
+		query += "')"
+
+		conn = sqlite3.connect('meteofib.db')
+		print "Opened database successfully";
+		cursor = conn.cursor()
+		cursor.execute(query)
+		conn.commit()
+		conn.close()
+
+
+application = Application([HelloWorldService, Consulta_DB, Insert_DB], 'spyne.examples.hello.soap',
+                          in_protocol=Soap11(validator='lxml'),
+                          out_protocol=Soap11())
+
+wsgi_application = WsgiApplication(application)
+
 
 if __name__ == '__main__':
-	app.run(host = '127.0.0.1')
+	import logging
+
+	from wsgiref.simple_server import make_server
+
+	logging.basicConfig(level=logging.DEBUG)
+	logging.getLogger('spyne.protocol.xml').setLevel(logging.DEBUG)
+
+	logging.info("listening to http://127.0.0.1:8000")
+	logging.info("wsdl is at: http://localhost:8000/lalaland?wsdl")
+
+	server = make_server('127.0.0.1', 8000, wsgi_application)
+	server.serve_forever()

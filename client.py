@@ -1,7 +1,8 @@
-from suds.client import Client as SudsClient
+from suds.client import Client
 
-url = 'http://127.0.0.1:5000/soap/someservice?wsdl'
-client = SudsClient(url=url, cache=None)
-#r = client.service.echo(str='hello world', cnt=3)
-r = client.service.consulta_db()
-print r
+c = Client('http://localhost:8000/lalaland?wsdl')
+c.options.cache.clear()
+print(c)
+print(c.service.say_hello('punk', 5))
+print(c.service.consulta_db())
+print(c.service.insert_db('2016-12-12', '18:00', 'Barcelona', '17.12', '57', '1001.23',))
