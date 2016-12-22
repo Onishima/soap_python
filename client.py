@@ -72,8 +72,12 @@ def insert():
 		temperatura = form.temperatura.data
 		humedad = form.humedad.data
 		p_atmos = form.p_atmos.data
-		c.service.insert_db(fecha, hora, ciudad, temperatura, humedad, p_atmos,)
-		return render_template('formulario.html', success=True)
+		data = c.service.insert_db(fecha, hora, ciudad, temperatura, humedad, p_atmos,)
+		datos = data[0]
+		if str(datos) == '[OK]':
+			return render_template('formulario.html', success=True)
+		else:			
+			return render_template('error.html',causa="Error de en la entrada.")
 
 	elif request.method == 'GET':
 		return render_template('formulario.html', form=form)
@@ -81,20 +85,45 @@ def insert():
 
 @app.route('/ciudad.html', methods=['GET', 'POST'])
 def ciudad():
-	try:
-		c = Client('http://localhost:9000/lalaland?wsdl', headers=headers)
-		c.options.cache.clear()
-	except:
-		return render_template('error.html', causa="No se puede conectar con la estacion.")
-	
-	if request.method == 'POST':		
 
-		ciutat = request.form.get("ciudad","")
-		data = c.service.consulta_ciudad(ciutat)
-		return str(data)
+	if request.method == 'POST':
+		try:
+			header = ['Fecha', 'Hora', 'Ciudad', 'Temperatura', 'Humedad', 'Presion Atm.']
+			c = Client('http://localhost:9000/lalaland?wsdl', headers=headers)
+			c.options.cache.clear()	
+			data=[]
+			fecha = []
+			hora = []
+			ciudad = []
+			temperatura = []
+			humedad = []
+			p_atmos = []
+			table = []
+			ciutat = request.form.get("ciudad","")
+			data = c.service.consulta_ciudad(ciutat)
+			datos = data[0]
+			if str(datos) == '[-1]':
+				return render_template('error.html',causa="Error de en el nombre de la Ciudad.")
+			for row in datos:
+				mycollapsedstring = ' '.join(row.split())
+				aux = mycollapsedstring.split(' ')
+				fecha.append(aux[0])
+				hora.append(aux[1])
+				ciudad.append(aux[2])
+				temperatura.append(aux[3])
+				humedad.append(aux[4])
+				p_atmos.append(aux[5])
+				table.append(aux)
 
+			return render_template('ciudad.html', header=header, table=table, success=False ) 
+
+		
+
+		except:
+			return render_template('error.html',causa="Error.")
+			
 	elif request.method == 'GET':
-		return render_template('ciudad.html')
+		return render_template('ciudad.html', success=True)
 
 
 if __name__ == "__main__":

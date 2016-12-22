@@ -11,55 +11,41 @@
     </div>
   {% else %}
 
+
+
     <form  id="contact-form" method="post" action="{{ url_for('insert') }}" role="form">
       <div class="controls">
         {{ form.hidden_tag() }}
-
-        <div class="row">
-          <div class="form-group col-md-offset-1 col-md-5">
-            {{ form.fecha.label(class_="control-label") }}
-            {{ form.fecha(class_="form-control", placeholder="Ingrese una fecha", required="", oninput="setCustomValidity('')", oninvalid="this.setCustomValidity('Información requerida')") }}
-            <div class="help-block with-errors"></div>
-          </div>
-         <div class="form-group col-md-offset-1 col-md-5">
-            {{ form.hora.label(class_="control-label") }}
-            {{ form.hora(class_="form-control", placeholder="Ingrese una hora", required="", oninput="setCustomValidity('')", oninvalid="this.setCustomValidity('Información requerida')") }}
-            <div class="help-block with-errors"></div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="form-group col-md-offset-1 col-md-5">
-            {{ form.ciudad.label(class_="control-label") }}
-            {{ form.ciudad(class_="form-control", placeholder="Ingrese una ciudad", required="", oninput="setCustomValidity('')", oninvalid="this.setCustomValidity('Información requerida')") }}
-            <div class="help-block with-errors"></div>
-          </div>
-        </div>
-        <div class="row">
-           <div class="form-group col-md-offset-1 col-md-5">
-            {{ form.temperatura.label(class_="control-label") }}
-            {{ form.temperatura(class_="form-control", placeholder="Ingrese una temperatura", required="", oninput="setCustomValidity('')", oninvalid="this.setCustomValidity('Información requerida')") }}
-            <div class="help-block with-errors"></div>         
-          </div>
-          <div class="form-group col-md-offset-1 col-md-5">
-            {{ form.humedad.label(class_="control-label") }}
-            {{ form.humedad(class_="form-control", placeholder="Ingrese una humedad", required="", oninput="setCustomValidity('')", oninvalid="this.setCustomValidity('Información requerida')") }}
-            <div class="help-block with-errors"></div>         
-          </div>
-          <div class="form-group col-md-offset-1 col-md-5">
-            {{ form.p_atmos.label(class_="control-label") }}
-            {{ form.p_atmos(class_="form-control", placeholder="Ingrese una Presion Atmosferica", required="", oninput="setCustomValidity('')", oninvalid="this.setCustomValidity('Información requerida')") }}
-            <div class="help-block with-errors"></div>         
-          </div>
-        </div>
-        <div class="row">
-          <div class="form-group col-md-offset-1 col-md-1">
-            {{ form.submit(class_="btn btn-primary") }}
-            <div class="help-block with-errors"></div>
-          </div>
-        </div>
+        <table>
+            <tr>
+               <td> {{ form.fecha.label(class_="control-label") }}</td>
+                <td> {{ form.fecha(class_="form-control", placeholder="Ingrese una fecha", required="", oninput="setCustomValidity('')", oninvalid="this.setCustomValidity('Información requerida')") }}</td>
+            </tr>
+              <td> {{ form.hora.label(class_="control-label") }}</td>
+              <td> {{ form.hora(class_="form-control", placeholder="Ingrese una hora", required="", oninput="setCustomValidity('')", oninvalid="this.setCustomValidity('Información requerida')") }}</td>
+            
+            <tr>
+              <td> {{ form.ciudad.label(class_="control-label") }}</td>
+              <td> {{ form.ciudad(class_="form-control", placeholder="Ingrese una ciudad", required="", oninput="setCustomValidity('')", oninvalid="this.setCustomValidity('Información requerida')") }}</td>
+            </tr>
+            <tr>
+              <td> {{ form.temperatura.label(class_="control-label") }}</td>
+              <td> {{ form.temperatura(class_="form-control", placeholder="Ingrese una temperatura", required="", oninput="setCustomValidity('')", oninvalid="this.setCustomValidity('Información requerida')") }}</td>
+            </tr>
+            <tr>  
+              <td> {{ form.humedad.label(class_="control-label") }}</td>
+              <td> {{ form.humedad(class_="form-control", placeholder="Ingrese una humedad", required="", oninput="setCustomValidity('')", oninvalid="this.setCustomValidity('Información requerida')") }}</td>
+            </tr>
+            <tr>
+              <td> {{ form.p_atmos.label(class_="control-label") }}</td>
+              <td> {{ form.p_atmos(class_="form-control", placeholder="Ingrese una Presion Atmosferica", required="", oninput="setCustomValidity('')", oninvalid="this.setCustomValidity('Información requerida')") }}</td>
+            </tr>
+            <tr>
+              <td> {{ form.submit(class_="btn btn-primary") }}</td>
+            </tr>
       </div>
     </form>
-
+  </table>
     <script>
         $('#contact-form').validator();
     </script>

@@ -5,7 +5,7 @@
     <title>Meteo Flask app</title>
 
     
-     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+     <link rel="stylesheet" href="{{ url_for('static', filename='css/tiempo.css') }}">
 
 
   </head>
@@ -23,20 +23,56 @@
     <li>
       <a href='insert.html'>Insert</a>
     </li>
+     <li>
+      <a href='ciudad.html'>Ciudad</a>
+    </li>
  
   </ul>
   <a href='#' id='openup'>MENU</a>
 </nav>
 <h1>Meteo</h1>
 
-  <form  id="contact-form" method="post" action="{{ url_for('ciudad') }}" role="form">
-       <p>Ciudad</p>
+{% if success %}
+<center>
+    <form  id="contact-form" method="post" action="{{ url_for('ciudad') }}" role="form">
+       <p>Ciudad a Buscar</p>
       <input type="text" id="ciudad" name="ciudad" value=""/>
 
-      <button type="submit" class="btn btn-primary">Buscar</button>
-    
+      <button type="submit" class="btn btn-primary">Buscar</button>   
+    </form>
+</center>    
 
-  </form>
+{% else %}
+<center>
+      <table class="container">
+        <thead>
+          <tr>                        
+            {% for n in header %}
+                <th>{{n}}</th>
+                {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+
+
+         {% for row in table %}
+        <tr>
+        {% set rowloop = loop %}
+        {% for cell in row %}
+          <td id="cell-{{ rowloop.index }}-{{ loop.index }}">{{ cell }}</td>
+        {% endfor %}
+        </tr>
+      {% endfor %}
+         
+        </tbody>
+      </table >
+
+  </center>
+
+{% endif %}
+
+
+
 
   
 

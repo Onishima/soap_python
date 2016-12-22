@@ -54,46 +54,68 @@ class Consulta_DB(ServiceBase):
 class Consulta_CIUDAD(ServiceBase):
 	@rpc(Unicode, _returns=Iterable(Unicode))
 	def consulta_ciudad(ctx, ciutat):
+	
 		try:
+			conn = sqlite3.connect('meteofib.db')
+			print "Opened database successfully";
+			cursor = conn.cursor()
+			cursor.execute("SELECT * FROM meteofib_table WHERE ciudad=(?)",(ciutat,))
+			rv = cursor.fetchall()
+			conn.close()
+			row_list = []
+			result = ""
+			for row in rv:
+				#result = "Fecha: "
+				result = row[0]
+				result += " "
+				#result += " Hora: "
+				result += row[1]
+				result += " "
+				#result += " Ciudad: "
+				result += row[2]
+				result += " "
+				#result += " Temperatura: "
+				result += row[3]
+				result += " "
+				#result += " Humedad: "
+				result += row[4] 
+				result += " "
+				#result += " P_atmos: "
+				result += row[5]
+				yield(result)
+		except:
+			yield u'-1'
+
+		
+class Insert_DB(ServiceBase):
+	@rpc(Unicode, Unicode, Unicode, Unicode, Unicode, Unicode, _returns=Iterable(Unicode)) #decorator
+	def insert_db(ctx, fecha, hora, ciudad, temperatura, humedad, p_atmos):
+
+		try:
+			query = "INSERT INTO meteofib_table (fecha, hora, ciudad, temperatura, humedad, p_atmos) VALUES ('"
+			query += fecha
+			query += "', '"
+			query += hora
+			query += "', '"
+			query += ciudad
+			query += "', '"
+			query += temperatura
+			query += "', '"
+			query += humedad
+			query += "', '"		
+			query += p_atmos
+			query += "')"
 
 			conn = sqlite3.connect('meteofib.db')
 			print "Opened database successfully";
 			cursor = conn.cursor()
-			cursor.execute("SELECT * FROM meteofib_table WHERE ciudad="+ciutat+"")
-			rv = cursor.fetchall()
+			cursor.execute(query)
+			conn.commit()
 			conn.close()
-			row_list = []
-			result = rv
-			
-			yield(result)
-
+			yield u'OK'
 		except:
 			yield u'-1'
 
-class Insert_DB(ServiceBase):
-	@rpc(Unicode, Unicode, Unicode, Unicode, Unicode, Unicode) #decorator
-	def insert_db(ctx, fecha, hora, ciudad, temperatura, humedad, p_atmos):
-
-		query = "INSERT INTO meteofib_table (fecha, hora, ciudad, temperatura, humedad, p_atmos) VALUES ('"
-		query += fecha
-		query += "', '"
-		query += hora
-		query += "', '"
-		query += ciudad
-		query += "', '"
-		query += temperatura
-		query += "', '"
-		query += humedad
-		query += "', '"		
-		query += p_atmos
-		query += "')"
-
-		conn = sqlite3.connect('meteofib.db')
-		print "Opened database successfully";
-		cursor = conn.cursor()
-		cursor.execute(query)
-		conn.commit()
-		conn.close()
 
 
 application = Application([HelloWorldService, Consulta_DB, Consulta_CIUDAD, Insert_DB], 'spyne.examples.hello.soap',
