@@ -1,3 +1,4 @@
+#!/usr/bin/python
 from spyne import Application, rpc, ServiceBase, Iterable, Integer, Unicode
 
 from spyne.protocol.soap import Soap11
@@ -5,6 +6,7 @@ from spyne.server.wsgi import WsgiApplication
 
 import sqlite3
 import collections
+
 
 
 class HelloWorldService(ServiceBase):
@@ -16,28 +18,57 @@ class HelloWorldService(ServiceBase):
 class Consulta_DB(ServiceBase):
 	@rpc(_returns=Iterable(Unicode)) #decorator
 	def consulta_db(ctx):
-		conn = sqlite3.connect('meteofib.db')
-		print "Opened database successfully";
-		cursor = conn.cursor()
-		cursor.execute("SELECT * FROM meteofib_table")
-		rv = cursor.fetchall()
-		conn.close()
-		row_list = []
-		result = ""
-		for row in rv:
-			result = "Fecha: "
-			result += row[0]
-			result += " Hora: "
-			result += row[1]
-			result += " Ciudad: "
-			result += row[2]
-			result += " Temperatura: "
-			result += row[3]
-			result += " Humedad: "
-			result += row[4]
-			result += " P_atmos: "
-			result += row[5]
+		try:
+
+			conn = sqlite3.connect('meteofib.db')
+			print "Opened database successfully";
+			cursor = conn.cursor()
+			cursor.execute("SELECT * FROM meteofib_table")
+			rv = cursor.fetchall()
+			conn.close()
+			row_list = []
+			result = ""
+			for row in rv:
+				#result = "Fecha: "
+				result = row[0]
+				result += " "
+				#result += " Hora: "
+				result += row[1]
+				result += " "
+				#result += " Ciudad: "
+				result += row[2]
+				result += " "
+				#result += " Temperatura: "
+				result += row[3]
+				result += " "
+				#result += " Humedad: "
+				result += row[4] 
+				result += " "
+				#result += " P_atmos: "
+				result += row[5]
+				yield(result)
+
+		except:
+			yield u'-1'
+
+class Consulta_CIUDAD(ServiceBase):
+	@rpc(Unicode, _returns=Iterable(Unicode))
+	def consulta_ciudad(ctx, ciutat):
+		try:
+
+			conn = sqlite3.connect('meteofib.db')
+			print "Opened database successfully";
+			cursor = conn.cursor()
+			cursor.execute("SELECT * FROM meteofib_table WHERE ciudad="+ciutat+"")
+			rv = cursor.fetchall()
+			conn.close()
+			row_list = []
+			result = rv
+			
 			yield(result)
+
+		except:
+			yield u'-1'
 
 class Insert_DB(ServiceBase):
 	@rpc(Unicode, Unicode, Unicode, Unicode, Unicode, Unicode) #decorator
@@ -65,7 +96,7 @@ class Insert_DB(ServiceBase):
 		conn.close()
 
 
-application = Application([HelloWorldService, Consulta_DB, Insert_DB], 'spyne.examples.hello.soap',
+application = Application([HelloWorldService, Consulta_DB, Consulta_CIUDAD, Insert_DB], 'spyne.examples.hello.soap',
                           in_protocol=Soap11(validator='lxml'),
                           out_protocol=Soap11())
 
@@ -80,8 +111,8 @@ if __name__ == '__main__':
 	logging.basicConfig(level=logging.DEBUG)
 	logging.getLogger('spyne.protocol.xml').setLevel(logging.DEBUG)
 
-	logging.info("listening to http://127.0.0.1:8000")
-	logging.info("wsdl is at: http://localhost:8000/lalaland?wsdl")
+	logging.info("listening to http://127.0.0.1:9000")
+	logging.info("wsdl is at: http://localhost:9000/lalaland?wsdl")
 
-	server = make_server('127.0.0.1', 8000, wsgi_application)
+	server = make_server('127.0.0.1', 9000, wsgi_application)
 	server.serve_forever()
